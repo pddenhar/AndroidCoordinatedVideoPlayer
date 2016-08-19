@@ -42,8 +42,8 @@ public class VideoPlaybackActivity extends AppCompatActivity {
         //for now, just play the video instead of scheduling it
         final VideoView videoView = (VideoView) findViewById(R.id.videoView);
         if(!videoPath.equals("")) {
-            videoView.setVideoPath(videoPath);
-            //videoView.setVideoURI(Uri.parse(videoURI.toString()));
+            //videoView.setVideoPath(videoPath);
+            videoView.setVideoURI(Uri.parse(videoPath));
 
             videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener()
             {

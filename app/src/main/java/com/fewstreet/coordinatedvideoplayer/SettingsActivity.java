@@ -55,22 +55,11 @@ public class SettingsActivity extends PreferenceActivity {
                     // Get the Uri of the selected file
                     String filePath = null;
                     Uri _uri = data.getData();
-                    Log.d(TAG,"URI = "+ _uri);
-                    if (_uri != null && "content".equals(_uri.getScheme())) {
-                        Log.d(TAG,"HEREERERERE");
-                        Cursor cursor = this.getContentResolver().query(_uri, new String[] { MediaStore.Video.VideoColumns.DATA }, null, null, null);
-                        cursor.moveToFirst();
-                        Log.d(TAG,"AWIEJHAWIEJHAIOWJE    " + cursor.getString(1));
-                        filePath = cursor.getString(0);
-                        cursor.close();
-                    } else {
-                        filePath = _uri.getPath();
-                    }
-
+                    getContentResolver().takePersistableUriPermission(_uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
                     SharedPreferences.Editor editor = preferences.edit();
-                    Log.d(TAG, "fucking dink: " + filePath);
-                    editor.putString("filePicker", filePath);
+                    editor.putString("filePicker", _uri.toString());
                     editor.commit();
                 }
                 break;

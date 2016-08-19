@@ -6,7 +6,7 @@
         android:key="coordinatorMode" />
     <PreferenceScreen android:title="Choose Media File">
         <intent
-            android:action="android.intent.action.GET_CONTENT"
+            android:action="android.intent.action.OPEN_DOCUMENT"
             android:mimeType="video/*">
             <extra android:name="hasResult" android:value="true" />
         </intent>
