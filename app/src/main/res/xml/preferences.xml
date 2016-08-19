@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference android:title="Coordinator Mode"
+        android:defaultValue="false"
+        android:summary="If selected, device will not play back videos but instead coordinate the playback of all other devices on network."
+        android:key="coordinatorMode" />
+    <PreferenceScreen android:title="Choose Media File">
+        <intent
+            android:action="android.intent.action.GET_CONTENT"
+            android:mimeType="video/*">
+            <extra android:name="hasResult" android:value="true" />
+        </intent>
+    </PreferenceScreen>
+</PreferenceScreen>
