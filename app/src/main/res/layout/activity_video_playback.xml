@@ -6,22 +6,15 @@
     android:layout_height="match_parent"
     android:layout_alignParentBottom="true"
     android:layout_centerHorizontal="true"
-    tools:context="com.fewstreet.coordinatedvideoplayer.VideoPlaybackActivity">
-
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Choose Video"
-        android:id="@+id/choose_video"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:onClick="chooseVideoClick" />
+    android:background="@android:color/black"
+    tools:context="com.fewstreet.coordinatedvideoplayer.VideoPlaybackActivity"
+    android:id="@+id/mainLayout">
 
     <VideoView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
         android:id="@+id/videoView" />
 
 </LinearLayout>

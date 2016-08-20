@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,11 +24,74 @@ public class VideoPlaybackActivity extends AppCompatActivity {
     private final String TAG = "VideoPlaybackActivity";
     DatagramSocket syncSocket = null;
     ReceiveStartCommandTask syncSocketListener;
+    private final Handler mHideHandler = new Handler();
+    private View mContentView;
+    private boolean mVisible;
+    private static final int AUTO_HIDE_DELAY_MILLIS = 1500;
+    private boolean videoReady = false;
+    private final Runnable mHideRunnable = new Runnable() {
+        @Override
+        public void run() {
+            hide();
+        }
+    };
+    private final Handler playHandler = new Handler();
+    private final Runnable delayedPlayRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if(videoReady) {
+                final VideoView videoView = (VideoView) findViewById(R.id.videoView);
+                videoView.start();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_playback);
+        mVisible = true;
+        mContentView = findViewById(R.id.mainLayout);
+
+        mContentView.setKeepScreenOn(true);
+
+        // Set up the user interaction to manually show or hide the system UI.
+        mContentView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                show();
+            }
+        });
+
+        final VideoView videoView = (VideoView) findViewById(R.id.videoView);
+        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener()
+        {
+            @Override
+            public void onPrepared(MediaPlayer mp)
+            {
+                videoReady = true;
+            }
+        });
+
+        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
+        {
+            @Override
+            public void onCompletion(MediaPlayer mp)
+            {
+                videoView.setVisibility(View.GONE);
+                videoView.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        // Trigger the initial hide() shortly after the activity has been
+        // created, to briefly hint to the user that UI controls
+        // are available.
+        delayedHide(200);
     }
 
     public void startSocketListenerTask() {
@@ -38,21 +102,18 @@ public class VideoPlaybackActivity extends AppCompatActivity {
     public void setVideoPlaybackTime(long unixtime) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         String videoPath = preferences.getString("filePicker", "");
-        Log.d(TAG, "Path: " + videoPath);
-        //for now, just play the video instead of scheduling it
         final VideoView videoView = (VideoView) findViewById(R.id.videoView);
         if(!videoPath.equals("")) {
-            //videoView.setVideoPath(videoPath);
             videoView.setVideoURI(Uri.parse(videoPath));
+            videoReady = false;
+            long currentTime = System.currentTimeMillis() / 1000L;
+            long delayMillis = (unixtime - currentTime) * 1000;
+            if(delayMillis < 0){
+                delayMillis=1;
+            }
+            Log.d(TAG, "Current time is "+currentTime+" scheduling playback for "+delayMillis+" in the future.");
+            playHandler.postDelayed(delayedPlayRunnable, delayMillis);
 
-            videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener()
-            {
-                @Override
-                public void onPrepared(MediaPlayer mp)
-                {
-                    videoView.start();
-                }
-            });
         }
     }
 
@@ -69,6 +130,7 @@ public class VideoPlaybackActivity extends AppCompatActivity {
         }
 
         startSocketListenerTask();
+        delayedHide(100);
     }
 
     @Override
@@ -90,38 +152,26 @@ public class VideoPlaybackActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    private static final int FILE_SELECT_CODE = 0;
-    private Uri videoURI = null;
-    public void chooseVideoClick(View view) {
-        showFileChooser();
+    private void delayedHide(int delayMillis) {
+        mHideHandler.removeCallbacks(mHideRunnable);
+        mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
-    private void showFileChooser() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
 
-        try {
-            startActivityForResult(
-                    Intent.createChooser(intent, "Select a File to Play"),
-                    FILE_SELECT_CODE);
-        } catch (android.content.ActivityNotFoundException ex) {
-            // Potentially direct the user to the Market with a Dialog
-            Toast.makeText(this, "Please install a File Manager.",
-                    Toast.LENGTH_SHORT).show();
-        }
+    private void hide() {
+        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+        mVisible = false;
     }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case FILE_SELECT_CODE:
-                if (resultCode == RESULT_OK) {
-                    // Get the Uri of the selected file
-                    Uri uri = data.getData();
-                    Log.d(TAG, "File Uri: " + uri.toString());
-                    videoURI = uri;
-                }
-                break;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
+
+    private void show() {
+        // Show the system bar
+        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        mVisible = true;
+        delayedHide(AUTO_HIDE_DELAY_MILLIS);
     }
 }
