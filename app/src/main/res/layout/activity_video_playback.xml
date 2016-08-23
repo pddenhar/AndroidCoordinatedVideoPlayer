@@ -1,20 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--xmlns:tools="http://schemas.android.com/tools"-->
+    <!--android:orientation="vertical"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:layout_centerVertical="true"-->
+    <!--android:layout_centerHorizontal="true"-->
+    <!--android:background="@android:color/holo_red_light"-->
+    <!--tools:context="com.fewstreet.coordinatedvideoplayer.VideoPlaybackActivity"-->
+    <!--android:id="@+id/mainLayout">-->
+
+    <!--<VideoView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_centerInParent="true"-->
+        <!--android:layout_gravity="center"-->
+        <!--android:id="@+id/videoView" />-->
+
+<!--</LinearLayout>-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_alignParentBottom="true"
-    android:layout_centerHorizontal="true"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:id="@+id/mainLayout"
     android:background="@android:color/black"
-    tools:context="com.fewstreet.coordinatedvideoplayer.VideoPlaybackActivity"
-    android:id="@+id/mainLayout">
-
+    tools:context="com.fewstreet.coordinatedvideoplayer.VideoPlaybackActivity">
+    <!-- Video player -->
     <VideoView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         android:layout_gravity="center"
-        android:id="@+id/videoView" />
-
-</LinearLayout>
+        android:id="@+id/videoView">
+    </VideoView>
+</FrameLayout>

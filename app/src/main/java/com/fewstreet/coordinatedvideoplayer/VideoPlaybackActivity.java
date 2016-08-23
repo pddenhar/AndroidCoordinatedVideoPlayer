@@ -40,8 +40,11 @@ public class VideoPlaybackActivity extends AppCompatActivity {
         @Override
         public void run() {
             if(videoReady) {
+                Log.d(TAG,"Playing video");
                 final VideoView videoView = (VideoView) findViewById(R.id.videoView);
                 videoView.start();
+            } else {
+                Log.d(TAG, "Tried to play video but it was not ready");
             }
         }
     };
@@ -100,21 +103,14 @@ public class VideoPlaybackActivity extends AppCompatActivity {
     }
 
     public void setVideoPlaybackTime(long unixtime) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String videoPath = preferences.getString("filePicker", "");
-        final VideoView videoView = (VideoView) findViewById(R.id.videoView);
-        if(!videoPath.equals("")) {
-            videoView.setVideoURI(Uri.parse(videoPath));
-            videoReady = false;
-            long currentTime = System.currentTimeMillis() / 1000L;
-            long delayMillis = (unixtime - currentTime) * 1000;
-            if(delayMillis < 0){
-                delayMillis=1;
-            }
-            Log.d(TAG, "Current time is "+currentTime+" scheduling playback for "+delayMillis+" in the future.");
-            playHandler.postDelayed(delayedPlayRunnable, delayMillis);
-
+        long currentTime = System.currentTimeMillis();
+        long delayMillis = (unixtime * 1000 - currentTime);
+        if(delayMillis < 0){
+            delayMillis=1;
         }
+        Log.d(TAG, "Current time is "+currentTime+" scheduling playback for "+delayMillis+" in the future.");
+        playHandler.removeCallbacks(delayedPlayRunnable);
+        playHandler.postDelayed(delayedPlayRunnable, delayMillis);
     }
 
 
@@ -130,6 +126,15 @@ public class VideoPlaybackActivity extends AppCompatActivity {
         }
 
         startSocketListenerTask();
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String videoPath = preferences.getString("filePicker", "");
+        final VideoView videoView = (VideoView) findViewById(R.id.videoView);
+        if(!videoPath.equals("")) {
+            videoView.setVideoURI(Uri.parse(videoPath));
+            videoReady = false;
+        }
+
         delayedHide(100);
     }
 
