@@ -52,6 +52,7 @@ public class VideoPlaybackActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "OnCreate happened");
         setContentView(R.layout.activity_video_playback);
         mVisible = true;
         mContentView = findViewById(R.id.mainLayout);
@@ -76,15 +77,15 @@ public class VideoPlaybackActivity extends AppCompatActivity {
             }
         });
 
-        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
-        {
-            @Override
-            public void onCompletion(MediaPlayer mp)
-            {
-                videoView.setVisibility(View.GONE);
-                videoView.setVisibility(View.VISIBLE);
-            }
-        });
+//        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
+//        {
+//            @Override
+//            public void onCompletion(MediaPlayer mp)
+//            {
+//                videoView.setVisibility(View.GONE);
+//                videoView.setVisibility(View.VISIBLE);
+//            }
+//        });
     }
 
     @Override
@@ -108,6 +109,7 @@ public class VideoPlaybackActivity extends AppCompatActivity {
         if(delayMillis < 0){
             delayMillis=1;
         }
+        delayMillis=3000;
         Log.d(TAG, "Current time is "+currentTime+" scheduling playback for "+delayMillis+" in the future.");
         playHandler.removeCallbacks(delayedPlayRunnable);
         playHandler.postDelayed(delayedPlayRunnable, delayMillis);
