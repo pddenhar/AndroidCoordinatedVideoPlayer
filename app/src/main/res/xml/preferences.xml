@@ -4,6 +4,14 @@
         android:defaultValue="false"
         android:summary="If selected, device will not play back videos but instead coordinate the playback of all other devices on network."
         android:key="coordinatorMode" />
+    <EditTextPreference
+        android:key="playbackDelay"
+        android:title="Playback Delay"
+        android:summary="How many seconds in the future to schedule playback when in controller mode."
+        android:numeric="integer"
+        android:maxLength="2"
+        android:defaultValue="8"
+        />
     <PreferenceScreen android:title="Choose Media File">
         <intent
             android:action="android.intent.action.OPEN_DOCUMENT"

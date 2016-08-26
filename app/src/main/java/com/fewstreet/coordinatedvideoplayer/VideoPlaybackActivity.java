@@ -119,6 +119,18 @@ public class VideoPlaybackActivity extends AppCompatActivity {
     @Override protected void onStart() {
         super.onStart();
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        //check if the app is in control mode. If so, start that activity instead.
+        boolean coordinatorMode = preferences.getBoolean("coordinatorMode", false);
+        if(coordinatorMode) {
+            Intent intent = new Intent(this,ControlActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+            startActivity(intent);
+            this.finish();
+            return;
+        }
+
         try {
             syncSocket = new DatagramSocket(8941);
             syncSocket.setBroadcast(true);
@@ -129,7 +141,7 @@ public class VideoPlaybackActivity extends AppCompatActivity {
 
         startSocketListenerTask();
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         String videoPath = preferences.getString("filePicker", "");
         final VideoView videoView = (VideoView) findViewById(R.id.videoView);
         if(!videoPath.equals("")) {
@@ -143,8 +155,10 @@ public class VideoPlaybackActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        syncSocketListener.cancel(true);
-        syncSocket.close();
+        if(syncSocket!=null) {
+            syncSocketListener.cancel(true);
+            syncSocket.close();
+        }
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
