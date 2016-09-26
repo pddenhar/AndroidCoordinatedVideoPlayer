@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/updateVideo" android:onClick="updateVideo" android:title="Update Video File" />
+    <item android:id="@+id/about" android:onClick="launchSettings" android:title="Settings" />
 </menu>

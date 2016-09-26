@@ -3,6 +3,8 @@ package com.fewstreet.coordinatedvideoplayer;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -28,10 +30,10 @@ public class ReceiveStartCommandTask extends AsyncTask<DatagramSocket,Void,Long>
             DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
             try {
                 datagramSockets[0].receive(packet);
-                ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE/Byte.SIZE);
-                buffer.put(packet.getData(), 0, Long.SIZE/Byte.SIZE);
-                buffer.flip();//need flip
-                return buffer.getLong();
+                String json = new String(packet.getData(), 0, packet.getLength());
+                Gson gson = new Gson();
+                Long startTime = gson.fromJson(json, Long.class);
+                return startTime;
             } catch (IOException e) {
                 //e.printStackTrace();
                 Log.d(TAG, "Datagram socket receive was interrupted ");

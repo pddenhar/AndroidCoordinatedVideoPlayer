@@ -19,4 +19,9 @@
             <extra android:name="hasResult" android:value="true" />
         </intent>
     </PreferenceScreen>
+    <EditTextPreference
+        android:key="fileURL"
+        android:title="Video File URL"
+        android:summary="URL to download an updated video file from when an update command is run on the controlling device."
+        />
 </PreferenceScreen>

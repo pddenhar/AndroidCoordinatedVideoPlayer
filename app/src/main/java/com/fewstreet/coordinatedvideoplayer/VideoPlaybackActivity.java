@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -24,10 +25,11 @@ public class VideoPlaybackActivity extends AppCompatActivity {
     private final String TAG = "VideoPlaybackActivity";
     DatagramSocket syncSocket = null;
     ReceiveStartCommandTask syncSocketListener;
+    UpdateVideoTask videoDownloadTask;
     private final Handler mHideHandler = new Handler();
     private View mContentView;
     private boolean mVisible;
-    private static final int AUTO_HIDE_DELAY_MILLIS = 1500;
+    private static final int AUTO_HIDE_DELAY_MILLIS = 2500;
     private boolean videoReady = false;
     private final Runnable mHideRunnable = new Runnable() {
         @Override
@@ -141,15 +143,18 @@ public class VideoPlaybackActivity extends AppCompatActivity {
 
         startSocketListenerTask();
 
-
         String videoPath = preferences.getString("filePicker", "");
+        loadVideo(videoPath);
+
+        delayedHide(100);
+    }
+
+    public void loadVideo(String videoPath) {
         final VideoView videoView = (VideoView) findViewById(R.id.videoView);
         if(!videoPath.equals("")) {
             videoView.setVideoURI(Uri.parse(videoPath));
             videoReady = false;
         }
-
-        delayedHide(100);
     }
 
     @Override
@@ -162,8 +167,8 @@ public class VideoPlaybackActivity extends AppCompatActivity {
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
-
         MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu_settings, menu);
         inflater.inflate(R.menu.options_menu, menu);
         return true;
     }
@@ -171,6 +176,20 @@ public class VideoPlaybackActivity extends AppCompatActivity {
     public void launchSettings(MenuItem item) {
         Intent i = new Intent(this, SettingsActivity.class);
         startActivity(i);
+    }
+    public void updateVideo(MenuItem item) {
+        if(videoDownloadTask == null || videoDownloadTask.getStatus() == AsyncTask.Status.FINISHED) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            videoDownloadTask = new UpdateVideoTask(this);
+            String url = preferences.getString("fileURL", "");
+            Log.d(TAG, "Starting video download from " + url);
+            if (!url.equals("")) {
+                videoDownloadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
+                Log.d(TAG, "Started task");
+            }
+        } else {
+            Log.d(TAG, "Can't start video download task again because one is already running");
+        }
     }
 
     private void delayedHide(int delayMillis) {

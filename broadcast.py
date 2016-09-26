@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Send UDP broadcast packets
 
 MYPORT = 8941

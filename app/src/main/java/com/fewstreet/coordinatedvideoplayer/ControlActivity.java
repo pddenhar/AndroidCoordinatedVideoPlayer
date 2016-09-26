@@ -1,9 +1,12 @@
 package com.fewstreet.coordinatedvideoplayer;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -17,10 +20,14 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 
@@ -51,7 +58,7 @@ public class ControlActivity extends AppCompatActivity {
 
         try {
             bcastAddr = getBroadcastAddress();
-            //Toast.makeText(this, "Broadcast Address = " + broadcastAddr.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Broadcast Address = " + bcastAddr.toString(), Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             Toast.makeText(this, "Exception while trying to get WiFi broadcast address", Toast.LENGTH_LONG).show();
             e.printStackTrace();
@@ -93,13 +100,12 @@ public class ControlActivity extends AppCompatActivity {
         // Return something from `doInBackground` to `onPostExecute`
         new AsyncTask<Void, Void, Boolean>() {
             protected Boolean doInBackground(Void... params) {
-                int size = Long.SIZE/Byte.SIZE;
-                //schedule playback for 8 seconds in the future
+                //schedule playback for delay seconds in the future
                 long currentTime = System.currentTimeMillis()/1000L + delay;
-                ByteBuffer buffer = ByteBuffer.allocate(size);
-                buffer.putLong(currentTime);
-                byte[] message = buffer.array();
-                DatagramPacket p = new DatagramPacket(message, size,bcastAddr,8941);
+                Gson gson = new Gson();
+                String json = gson.toJson(currentTime);
+                byte[] message = json.getBytes();
+                DatagramPacket p = new DatagramPacket(message, message.length, bcastAddr,8941);
                 try {
                     for (int i = 0; i < 5; i++){
                         bcastSocket.send(p);
@@ -124,7 +130,7 @@ public class ControlActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.options_menu, menu);
+        inflater.inflate(R.menu.options_menu_settings, menu);
         return true;
     }
 
@@ -135,10 +141,12 @@ public class ControlActivity extends AppCompatActivity {
     private InetAddress getBroadcastAddress() throws IOException {
         WifiManager myWifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
         DhcpInfo myDhcpInfo = myWifiManager.getDhcpInfo();
+
         if (myDhcpInfo == null) {
             Toast.makeText(this, "Could not get broadcast address", Toast.LENGTH_LONG).show();
             return null;
         }
+        Log.d(TAG, myDhcpInfo.toString());
         int broadcast = (myDhcpInfo.ipAddress & myDhcpInfo.netmask)
                 | ~myDhcpInfo.netmask;
         byte[] quads = new byte[4];
