@@ -107,7 +107,7 @@ public class ControlActivity extends AppCompatActivity {
                 byte[] message = json.getBytes();
                 DatagramPacket p = new DatagramPacket(message, message.length, bcastAddr,8941);
                 try {
-                    for (int i = 0; i < 5; i++){
+                    for (int i = 0; i < 10; i++){
                         bcastSocket.send(p);
                     }
                 } catch (IOException e) {
