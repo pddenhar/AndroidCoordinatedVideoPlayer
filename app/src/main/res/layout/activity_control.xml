@@ -8,7 +8,8 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.fewstreet.coordinatedvideoplayer.ControlActivity">
+    tools:context="com.fewstreet.coordinatedvideoplayer.ControlActivity"
+    android:weightSum="1">
 
     <TextView
         android:layout_width="wrap_content"
@@ -33,4 +34,18 @@
         android:text="@string/wifi_not_connected"
         android:id="@+id/wifiIP"
         android:layout_gravity="center_horizontal" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.09" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Update All Videos"
+        android:id="@+id/updateButton"
+        android:layout_gravity="center_horizontal"
+        android:onClick="updateClick" />
 </LinearLayout>

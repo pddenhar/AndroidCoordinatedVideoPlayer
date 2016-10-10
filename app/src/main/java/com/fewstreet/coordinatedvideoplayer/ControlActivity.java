@@ -103,7 +103,42 @@ public class ControlActivity extends AppCompatActivity {
                 //schedule playback for delay seconds in the future
                 long currentTime = System.currentTimeMillis()/1000L + delay;
                 Gson gson = new Gson();
-                String json = gson.toJson(currentTime);
+                CommandPacket cp = new CommandPacket();
+                cp.playback_ts = currentTime;
+                String json = gson.toJson(cp);
+                byte[] message = json.getBytes();
+                DatagramPacket p = new DatagramPacket(message, message.length, bcastAddr,8941);
+                try {
+                    for (int i = 0; i < 10; i++) {
+                        bcastSocket.send(p);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                return true;
+            }
+            @Override
+            protected void onPostExecute(Boolean result) {
+                if(result==true) {
+                    Toast.makeText(parent, "Sent broadcast to start playback in " + delay + " seconds", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(parent, "Sending broadcast failed", Toast.LENGTH_LONG).show();
+                }
+            }
+        }.execute();
+    }
+
+    public void updateClick(View v) {
+        final Activity parent = this;
+
+        // Return something from `doInBackground` to `onPostExecute`
+        new AsyncTask<Void, Void, Boolean>() {
+            protected Boolean doInBackground(Void... params) {
+                CommandPacket cp = new CommandPacket();
+                cp.update_video = true;
+                Gson gson = new Gson();
+                String json = gson.toJson(cp);
                 byte[] message = json.getBytes();
                 DatagramPacket p = new DatagramPacket(message, message.length, bcastAddr,8941);
                 try {
@@ -119,9 +154,9 @@ public class ControlActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(Boolean result) {
                 if(result==true) {
-                    Toast.makeText(parent, "Sent broadcast to start playback in " + delay + " seconds", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(parent, "Sent update video broadcast", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(parent, "Sending broadcast failed", Toast.LENGTH_LONG).show();
+                    Toast.makeText(parent, "Sending update broadcast failed", Toast.LENGTH_LONG).show();
                 }
             }
         }.execute();

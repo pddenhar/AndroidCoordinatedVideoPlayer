@@ -14,7 +14,7 @@ import java.util.Date;
 /**
  * Created by peter on 8/17/16.
  */
-public class ReceiveStartCommandTask extends AsyncTask<DatagramSocket,Void,Long> {
+public class ReceiveStartCommandTask extends AsyncTask<DatagramSocket,Void,CommandPacket> {
     private final String TAG = "ReceiveStartCommandTask";
     private VideoPlaybackActivity videoPlayer;
 
@@ -24,7 +24,7 @@ public class ReceiveStartCommandTask extends AsyncTask<DatagramSocket,Void,Long>
     }
 
     @Override
-    protected Long doInBackground(DatagramSocket... datagramSockets) {
+    protected CommandPacket doInBackground(DatagramSocket... datagramSockets) {
         if(datagramSockets.length == 1){
             byte[] recvBuf = new byte[1500];
             DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
@@ -32,8 +32,8 @@ public class ReceiveStartCommandTask extends AsyncTask<DatagramSocket,Void,Long>
                 datagramSockets[0].receive(packet);
                 String json = new String(packet.getData(), 0, packet.getLength());
                 Gson gson = new Gson();
-                Long startTime = gson.fromJson(json, Long.class);
-                return startTime;
+                CommandPacket recvd_command = gson.fromJson(json, CommandPacket.class);
+                return recvd_command;
             } catch (IOException e) {
                 //e.printStackTrace();
                 Log.d(TAG, "Datagram socket receive was interrupted ");
@@ -43,11 +43,14 @@ public class ReceiveStartCommandTask extends AsyncTask<DatagramSocket,Void,Long>
         return null;
     }
 
-    protected void onPostExecute(Long result) {
-        if(result != null) {
+    protected void onPostExecute(CommandPacket result) {
+        if(result != null && result.playback_ts != null) {
             Log.d(TAG, "Got a time to play video: " + result.toString());
-            videoPlayer.setVideoPlaybackTime(result);
-        } else {
+            videoPlayer.setVideoPlaybackTime(result.playback_ts);
+        } else if(result != null && result.update_video != null) {
+            Log.d(TAG, "Received update command");
+            videoPlayer.updateVideo(null);
+        }else {
             Log.d(TAG, "Result from UDP socket was null");
         }
         videoPlayer.startSocketListenerTask(); //restart a new socket listener to receive any further packets
