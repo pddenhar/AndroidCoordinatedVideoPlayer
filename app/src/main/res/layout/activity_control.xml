@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Coordinated Video Control"
+        android:text="@string/control_title"
         android:id="@+id/mainLabel"
         android:layout_gravity="center_horizontal" />
 
@@ -35,6 +35,14 @@
         android:id="@+id/wifiIP"
         android:layout_gravity="center_horizontal" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/same_wifi"
+        android:id="@+id/sameWiFiText"
+        android:textAlignment="center" />
+
     <Space
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -48,4 +56,5 @@
         android:id="@+id/updateButton"
         android:layout_gravity="center_horizontal"
         android:onClick="updateClick" />
+
 </LinearLayout>

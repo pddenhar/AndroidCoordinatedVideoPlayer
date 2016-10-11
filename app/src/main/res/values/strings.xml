@@ -2,6 +2,10 @@
     <string name="app_name">Coordinated Video Player</string>
     <string name="title_activity_settings">Settings</string>
     <string name="wifi_not_connected">WiFi Not Connected</string>
+    <string name="same_wifi">Note: All devices must be connected to the same WiFi network.</string>
+    <string name="control_title">Coordinated Video Control</string>
+    <string name="update_video_file">Update Video File</string>
+    <string name="settings">Settings</string>
 
     <!-- Strings related to Settings -->
 </resources>
