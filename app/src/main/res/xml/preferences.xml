@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <CheckBoxPreference android:title="Coordinator Mode"
+    <CheckBoxPreference android:title="@string/control_title"
         android:defaultValue="false"
-        android:summary="If selected, device will not play back videos but instead coordinate the playback of all other devices on network."
+        android:summary="@string/coordinator_mode_summary"
         android:key="coordinatorMode" />
     <EditTextPreference
         android:key="playbackDelay"
-        android:title="Playback Delay"
-        android:summary="How many seconds in the future to schedule playback when in controller mode."
+        android:title="@string/delay_title"
+        android:summary="@string/delay_summary"
         android:numeric="integer"
         android:maxLength="2"
         android:defaultValue="8"
         />
-    <PreferenceScreen android:title="Choose Media File">
+    <PreferenceScreen android:title="@string/media_file_title">
         <intent
             android:action="android.intent.action.OPEN_DOCUMENT"
             android:mimeType="video/*">
@@ -21,7 +21,7 @@
     </PreferenceScreen>
     <EditTextPreference
         android:key="fileURL"
-        android:title="Video File URL"
-        android:summary="URL to download an updated video file from when an update command is run on the controlling device."
+        android:title="@string/file_url_title"
+        android:summary="@string/download_url_summary"
         />
 </PreferenceScreen>
