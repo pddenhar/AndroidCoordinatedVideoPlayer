@@ -22,7 +22,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start Playback"
+        android:text="@string/start_playback"
         android:id="@+id/startPlayback"
         android:layout_gravity="center_horizontal"
         android:longClickable="false"
@@ -52,9 +52,17 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Update All Videos"
+        android:text="@string/update_all_videos"
         android:id="@+id/updateButton"
         android:layout_gravity="center_horizontal"
         android:onClick="updateClick" />
+
+    <Button
+        android:text="@string/blank_screens"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/blank_screens"
+        android:onClick="clearScreen" />
 
 </LinearLayout>

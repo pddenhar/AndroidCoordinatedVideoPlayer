@@ -101,6 +101,45 @@ public class ControlActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Create an asynctask and send a broadcast udp packet with the contents of cp
+     * @param cp Command packet to be broadcast out
+     * @param repeatTimes How many times to send the packet
+     * @param successToast Toast message to show on a successful broadcast
+     * @param failToast Toast message to show if broadcast fails
+     */
+    public void sendCommandPacket(final CommandPacket cp, final int repeatTimes, final String successToast, final String failToast) {
+        final Activity parent = this;
+        Gson gson = new Gson();
+        final String json = gson.toJson(cp);
+        new AsyncTask<Void, Void, Boolean>() {
+            protected Boolean doInBackground(Void... params) {
+                byte[] message = json.getBytes();
+                DatagramPacket p = new DatagramPacket(message, message.length, bcastAddr,8941);
+                try {
+                    for (int i = 0; i < repeatTimes; i++) {
+                        bcastSocket.send(p);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                return true;
+            }
+            @Override
+            protected void onPostExecute(Boolean result) {
+                if(result==true) {
+                    Log.d(TAG, "Sent command packet: "+ json);
+                    if(successToast!= null) {
+                        Toast.makeText(parent, successToast, Toast.LENGTH_SHORT).show();
+                    }
+                } else if(successToast!=null){
+                    Toast.makeText(parent, failToast, Toast.LENGTH_LONG).show();
+                }
+            }
+        }.execute();
+    }
+
     public void broadcastClick(View v)
     {
         final Activity parent = this;
@@ -109,103 +148,32 @@ public class ControlActivity extends AppCompatActivity {
         if(delaypref < 0)
             delaypref = 8;
         final int delay = delaypref;
-        // Return something from `doInBackground` to `onPostExecute`
-        new AsyncTask<Void, Void, Boolean>() {
-            protected Boolean doInBackground(Void... params) {
-                //schedule playback for delay seconds in the future
-                long currentTime = System.currentTimeMillis()/1000L + delay;
-                Gson gson = new Gson();
-                CommandPacket cp = new CommandPacket();
-                cp.playback_ts = currentTime;
-                String json = gson.toJson(cp);
-                byte[] message = json.getBytes();
-                DatagramPacket p = new DatagramPacket(message, message.length, bcastAddr,8941);
-                try {
-                    for (int i = 0; i < 10; i++) {
-                        bcastSocket.send(p);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-                return true;
-            }
-            @Override
-            protected void onPostExecute(Boolean result) {
-                if(result==true) {
-                    Toast.makeText(parent, "Sent broadcast to start playback in " + delay + " seconds", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(parent, "Sending broadcast failed", Toast.LENGTH_LONG).show();
-                }
-            }
-        }.execute();
+        long currentTime = System.currentTimeMillis()/1000L + delay;
+        CommandPacket cp = new CommandPacket();
+        cp.playback_ts = currentTime;
+        sendCommandPacket(cp,10,"Sent broadcast to start playback in " + delay + " seconds", "Sending broadcast failed");
     }
 
     public void sendKeepalive() {
         final Activity parent = this;
+        CommandPacket cp = new CommandPacket();
+        cp.keep_alive = true;
+        sendCommandPacket(cp, 2, null, getString(R.string.keepalive_failed));
 
-        // Return something from `doInBackground` to `onPostExecute`
-        new AsyncTask<Void, Void, Boolean>() {
-            protected Boolean doInBackground(Void... params) {
-                CommandPacket cp = new CommandPacket();
-                cp.keep_alive = true;
-                Gson gson = new Gson();
-                String json = gson.toJson(cp);
-                byte[] message = json.getBytes();
-                DatagramPacket p = new DatagramPacket(message, message.length, bcastAddr,8941);
-                try {
-                    for (int i = 0; i < 2; i++){
-                        bcastSocket.send(p);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-                return true;
-            }
-            @Override
-            protected void onPostExecute(Boolean result) {
-                if(result==true) {
-                    Log.d(TAG, "UDP keepalive sent");
-                    //Toast.makeText(parent, "Sent UDP keepalive", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(parent, "Sending keepalive failed", Toast.LENGTH_LONG).show();
-                }
-            }
-        }.execute();
+    }
+
+    public void clearScreen(View v) {
+        final Activity parent = this;
+        CommandPacket cp = new CommandPacket();
+        cp.clear_screen = true;
+        sendCommandPacket(cp,5,getString(R.string.clear_screen_command), getString(R.string.clear_screen_command_failed));
     }
 
     public void updateClick(View v) {
         final Activity parent = this;
-
-        // Return something from `doInBackground` to `onPostExecute`
-        new AsyncTask<Void, Void, Boolean>() {
-            protected Boolean doInBackground(Void... params) {
-                CommandPacket cp = new CommandPacket();
-                cp.update_video = true;
-                Gson gson = new Gson();
-                String json = gson.toJson(cp);
-                byte[] message = json.getBytes();
-                DatagramPacket p = new DatagramPacket(message, message.length, bcastAddr,8941);
-                try {
-                    for (int i = 0; i < 10; i++){
-                        bcastSocket.send(p);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-                return true;
-            }
-            @Override
-            protected void onPostExecute(Boolean result) {
-                if(result==true) {
-                    Toast.makeText(parent, "Sent update video broadcast", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(parent, "Sending update broadcast failed", Toast.LENGTH_LONG).show();
-                }
-            }
-        }.execute();
+        CommandPacket cp = new CommandPacket();
+        cp.update_video = true;
+        sendCommandPacket(cp,10,getString(R.string.sent_update_command), getString(R.string.update_command_failed));
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -224,7 +192,7 @@ public class ControlActivity extends AppCompatActivity {
         DhcpInfo myDhcpInfo = myWifiManager.getDhcpInfo();
 
         if (myDhcpInfo == null) {
-            Toast.makeText(this, "Could not get broadcast address", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.no_broadcast_address, Toast.LENGTH_LONG).show();
             return null;
         }
         Log.d(TAG, myDhcpInfo.toString());

@@ -14,11 +14,11 @@ import java.util.Date;
 /**
  * Created by peter on 8/17/16.
  */
-public class ReceiveStartCommandTask extends AsyncTask<DatagramSocket,Void,CommandPacket> {
-    private final String TAG = "ReceiveStartCommandTask";
+public class ReceiveCommandTask extends AsyncTask<DatagramSocket,Void,CommandPacket> {
+    private final String TAG = "ReceiveCommandTask";
     private VideoPlaybackActivity videoPlayer;
 
-    public ReceiveStartCommandTask(VideoPlaybackActivity player) {
+    public ReceiveCommandTask(VideoPlaybackActivity player) {
         super();
         videoPlayer = player;
     }
@@ -47,12 +47,15 @@ public class ReceiveStartCommandTask extends AsyncTask<DatagramSocket,Void,Comma
         if(result != null && result.playback_ts != null) {
             Log.d(TAG, "Got a time to play video: " + result.toString());
             videoPlayer.setVideoPlaybackTime(result.playback_ts);
-        } else if(result != null && result.update_video != null) {
+        } else if(result != null && result.update_video) {
             Log.d(TAG, "Received update command");
             videoPlayer.updateVideo(null);
+        } else if(result!=null && result.clear_screen) {
+            Log.d(TAG, "Received clear screen command.");
+            videoPlayer.clearViewView();
         } else if(result!=null && result.keep_alive) {
             Log.d(TAG, "Received keep alive packet.");
-        }else {
+        } else {
             Log.d(TAG, "Result from UDP socket was null");
         }
         videoPlayer.startSocketListenerTask(); //restart a new socket listener to receive any further packets

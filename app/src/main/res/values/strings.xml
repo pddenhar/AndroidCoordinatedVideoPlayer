@@ -12,6 +12,15 @@
     <string name="file_url_title">Video File URL</string>
     <string name="media_file_title">Choose Media File</string>
     <string name="delay_title">Playback Delay</string>
+    <string name="blank_screens">Blank Screens</string>
+    <string name="update_all_videos">Update All Videos</string>
+    <string name="start_playback">Start Playback</string>
+    <string name="no_broadcast_address">Could not get broadcast address</string>
+    <string name="sent_update_command">Sent update video command</string>
+    <string name="update_command_failed">Sending update command failed</string>
+    <string name="clear_screen_command">Sent clear screen command</string>
+    <string name="clear_screen_command_failed">Sending clear screen command failed</string>
+    <string name="keepalive_failed">Sending keepalive packet failed</string>
 
     <!-- Strings related to Settings -->
 </resources>

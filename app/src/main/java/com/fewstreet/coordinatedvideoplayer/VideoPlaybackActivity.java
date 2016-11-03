@@ -14,7 +14,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.net.DatagramSocket;
@@ -24,8 +23,9 @@ public class VideoPlaybackActivity extends AppCompatActivity {
 
     private final String TAG = "VideoPlaybackActivity";
     DatagramSocket syncSocket = null;
-    ReceiveStartCommandTask syncSocketListener;
+    ReceiveCommandTask syncSocketListener;
     UpdateVideoTask videoDownloadTask;
+    private VideoView videoView;
     private final Handler mHideHandler = new Handler();
     private View mContentView;
     private boolean mVisible;
@@ -43,7 +43,6 @@ public class VideoPlaybackActivity extends AppCompatActivity {
         public void run() {
             if(videoReady) {
                 Log.d(TAG,"Playing video");
-                final VideoView videoView = (VideoView) findViewById(R.id.videoView);
                 videoView.start();
             } else {
                 Log.d(TAG, "Tried to play video but it was not ready");
@@ -69,7 +68,7 @@ public class VideoPlaybackActivity extends AppCompatActivity {
             }
         });
 
-        final VideoView videoView = (VideoView) findViewById(R.id.videoView);
+        videoView = (VideoView) findViewById(R.id.videoView);
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener()
         {
             @Override
@@ -78,16 +77,6 @@ public class VideoPlaybackActivity extends AppCompatActivity {
                 videoReady = true;
             }
         });
-
-//        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
-//        {
-//            @Override
-//            public void onCompletion(MediaPlayer mp)
-//            {
-//                videoView.setVisibility(View.GONE);
-//                videoView.setVisibility(View.VISIBLE);
-//            }
-//        });
     }
 
     @Override
@@ -101,7 +90,7 @@ public class VideoPlaybackActivity extends AppCompatActivity {
     }
 
     public void startSocketListenerTask() {
-        syncSocketListener = new ReceiveStartCommandTask(this);
+        syncSocketListener = new ReceiveCommandTask(this);
         syncSocketListener.execute(syncSocket);
     }
 
@@ -116,7 +105,10 @@ public class VideoPlaybackActivity extends AppCompatActivity {
         playHandler.removeCallbacks(delayedPlayRunnable);
         playHandler.postDelayed(delayedPlayRunnable, delayMillis);
     }
-
+    public void clearViewView() {
+        videoView.setVisibility(View.GONE);
+        videoView.setVisibility(View.VISIBLE);
+    }
 
     @Override protected void onStart() {
         super.onStart();
@@ -150,7 +142,6 @@ public class VideoPlaybackActivity extends AppCompatActivity {
     }
 
     public void loadVideo(String videoPath) {
-        final VideoView videoView = (VideoView) findViewById(R.id.videoView);
         if(!videoPath.equals("")) {
             videoView.setVideoURI(Uri.parse(videoPath));
             videoReady = false;
