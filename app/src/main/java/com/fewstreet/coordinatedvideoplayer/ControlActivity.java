@@ -30,12 +30,15 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ControlActivity extends AppCompatActivity {
     private InetAddress bcastAddr;
     DatagramSocket bcastSocket = null;
     final String TAG = "ControlActivity";
-
+    ScheduledExecutorService scheduler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,11 +82,20 @@ public class ControlActivity extends AppCompatActivity {
             Log.d(TAG, "Socket open failed");
         }
 
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate
+            (new Runnable() {
+                public void run() {
+                    sendKeepalive();
+                }
+            }, 2, 10, TimeUnit.SECONDS);
+
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        scheduler.shutdownNow();
         if(bcastSocket!=null) {
             bcastSocket.close();
         }
@@ -124,6 +136,40 @@ public class ControlActivity extends AppCompatActivity {
                     Toast.makeText(parent, "Sent broadcast to start playback in " + delay + " seconds", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(parent, "Sending broadcast failed", Toast.LENGTH_LONG).show();
+                }
+            }
+        }.execute();
+    }
+
+    public void sendKeepalive() {
+        final Activity parent = this;
+
+        // Return something from `doInBackground` to `onPostExecute`
+        new AsyncTask<Void, Void, Boolean>() {
+            protected Boolean doInBackground(Void... params) {
+                CommandPacket cp = new CommandPacket();
+                cp.keep_alive = true;
+                Gson gson = new Gson();
+                String json = gson.toJson(cp);
+                byte[] message = json.getBytes();
+                DatagramPacket p = new DatagramPacket(message, message.length, bcastAddr,8941);
+                try {
+                    for (int i = 0; i < 2; i++){
+                        bcastSocket.send(p);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                return true;
+            }
+            @Override
+            protected void onPostExecute(Boolean result) {
+                if(result==true) {
+                    Log.d(TAG, "UDP keepalive sent");
+                    //Toast.makeText(parent, "Sent UDP keepalive", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(parent, "Sending keepalive failed", Toast.LENGTH_LONG).show();
                 }
             }
         }.execute();

@@ -50,6 +50,8 @@ public class ReceiveStartCommandTask extends AsyncTask<DatagramSocket,Void,Comma
         } else if(result != null && result.update_video != null) {
             Log.d(TAG, "Received update command");
             videoPlayer.updateVideo(null);
+        } else if(result!=null && result.keep_alive) {
+            Log.d(TAG, "Received keep alive packet.");
         }else {
             Log.d(TAG, "Result from UDP socket was null");
         }

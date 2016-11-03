@@ -6,4 +6,5 @@ package com.fewstreet.coordinatedvideoplayer;
 public class CommandPacket {
     public Long playback_ts;
     public Boolean update_video;
+    public Boolean keep_alive;
 }
